@@ -1,0 +1,47 @@
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+#variables:
+#  SAST_EXPERIMENTAL_FEATURES: 'true'
+#stages:
+#- test
+#sast:
+#  stage: test
+#  tags:
+#  - kubernetes
+#  artifacts:
+#    untracked: false
+#    expire_in: 30 days
+#include:
+#- template: Security/SAST.gitlab-ci.yml
+#- Checkmarx.gitlab-ci.yml
+
+stages:
+    - Code verification
+#    - test
+    - unit test
+    
+before_script:
+  - npm install
+
+Linting:
+ image: node:12
+ tags: 
+  - kubernetes
+  - analyst-kubernetes
+ stage: Code verification
+ script:
+  - npm run lint
+
+Unit test:
+ image: zenika/alpine-chrome:86-with-node
+ tags:
+  - kubernetes
+  - analyst-kubernetes
+ stage: unit test
+ script:
+  - node --version | xargs printf "Node %s\n"
+  - chromium-browser --version
+  - npm run test-gitci
